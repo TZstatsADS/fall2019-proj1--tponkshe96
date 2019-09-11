@@ -1,0 +1,23 @@
+---
+title: "Proj1-Lyrics"
+author: "Tusha Ponkshe"
+date: "9/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#loading processed lyrics data
+
+load('../output/processed_lyrics.RData')
+artists = read_csv('../data/artists.csv')
+names(artists) = c("artist", "intro", "formed", "members", "origin")
+artists_to_join = artists[, c("artist", "formed", "members", "origin")]
+
+leftJoinDf <- left_join(dt_lyrics, artists_to_join, by = "artist")
+View(leftJoinDf)
+```
+
