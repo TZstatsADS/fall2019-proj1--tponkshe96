@@ -214,7 +214,7 @@ song_words_filtered %>%
   ungroup() %>%
   mutate(word = reorder(word, n)) %>%
   ggplot() +
-    geom_col(aes(word, n), fill = "lightblue") +
+    geom_col(aes(word, n)) +
     theme(legend.position = "none", 
           plot.title = element_text(hjust = 0.5),
           panel.grid.major = element_blank()) +
@@ -224,11 +224,109 @@ song_words_filtered %>%
     coord_flip()
 ```
 
-**Word Clouds:**
+**Word Cloud: #1**
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 word_counts <- song_words_filtered %>%
   dplyr::count(word, sort = TRUE) 
 
 wordcloud2(word_counts[1:100, ], size = 0.5)
 
+set.seed(1234)
+wordcloud(words = word_counts$word, freq = word_counts$n, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(9, "Dark2"))
 ```
+
+
+**Popular Words By Genre:**
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+popular_words <- song_words_filtered %>% 
+  group_by(genre) %>%
+  dplyr::count(word, genre, sort = TRUE) %>%
+  slice(seq_len(8)) %>%
+  ungroup() %>%
+  arrange(genre,n) %>%
+  dplyr::mutate(row = row_number()) 
+
+popular_words %>%
+  ggplot(aes(row, n, fill = genre)) +
+    geom_col(show.legend = NULL) +
+    labs(x = NULL, y = "Song Count") +
+    ggtitle("Popular Words by Genre") + 
+    theme_lyrics() +  
+    facet_wrap(~genre, scales = "free") +
+    scale_x_continuous(  # This handles replacement of row 
+      breaks = popular_words$row, # notice need to reuse data frame
+      labels = popular_words$word) +
+    coord_flip()
+```
+
+The top words across the genres are very similar.
+
+
+**Popular words across decades**
+```{r}
+timeless_words <- song_words_filtered %>% 
+  filter(decade != 'NA') %>%
+  group_by(decade) %>%
+  dplyr::count(word, decade, sort = TRUE) %>%
+  slice(seq_len(8)) %>%
+  ungroup() %>%
+  arrange(decade,n) %>%
+  dplyr::mutate(row = row_number()) 
+
+timeless_words %>%
+  ggplot(aes(row, n, fill = decade)) +
+    geom_col(show.legend = NULL) +
+    labs(x = NULL, y = "Song Count") +
+    ggtitle("Timeless Words") + 
+    theme_lyrics() +  
+    facet_wrap(~decade, scales = "free", ncol = 5) +
+    scale_x_continuous(  # This handles replacement of row 
+      breaks = timeless_words$row, # notice need to reuse data frame
+      labels = timeless_words$word) +
+    coord_flip()
+```
+
+
+**Word Length**
+
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+word_lengths <- leftJoinDf %>%
+  unnest_tokens(word, stemmedwords) %>%
+  group_by(song,decade) %>%
+  distinct() %>%
+  filter(!word %in% undesirable_words) %>%
+  mutate(word_length = nchar(word)) 
+
+word_lengths %>%
+  dplyr::count(word_length, sort = TRUE) %>%
+  ggplot(aes(word_length), 
+         binwidth = 10) + 
+    geom_histogram(aes(fill = ..count..),
+                   breaks = seq(1,25, by = 2), 
+                   show.legend = FALSE) + 
+    xlab("Word Length") + 
+    ylab("Word Count") +
+    ggtitle("Word Length Distribution") +
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.grid.minor = element_blank())
+```
+
+It's interesting to see what these long words are through a wordcloud -->
+
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+wc <- word_lengths %>%
+  ungroup() %>%
+  dplyr::select(word, word_length) %>%
+  distinct() %>%
+  arrange(desc(word_length))
+
+wordcloud2(wc[1:100, ], 
+           size = .15,
+           minSize = .0005,
+           ellipticity = .3, 
+           rotateRatio = 1, 
+           fontWeight = "bold")
+```
+
