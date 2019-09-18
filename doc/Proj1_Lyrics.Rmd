@@ -1,15 +1,15 @@
 ---
-title: "Proj1-Lyrics"
-author: "Tusha Ponkshe"
-date: "9/10/2019"
-output: 
-  html_document:
-    code_folding: hide
+title: "Proj1 ADS"
+author: "Tushar Ponkshe"
+date: 'Due: 9/18/2019'
+output:
+  html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 
 ```{r, message=FALSE, warning=FALSE,echo=FALSE}
 packages.used=c("tm", "tidytext","tidyverse","DT","wordcloud","scales","gridExtra","ngram","igraph","ggraph","rsconnect")
@@ -26,6 +26,7 @@ if(length(packages.needed)>0){
 # load packages
 #most of the libraries needed
 library(dplyr) #data manipulation
+library(textdata)
 library(ggplot2) #visualizations
 library(gridExtra) #viewing multiple plots together
 library(tidytext) #text mining
@@ -40,86 +41,42 @@ library(tidyverse)
 library(DT)
 library(wordcloud)
 library(scales)
-library(gridExtra)
-library(ngram)
-library(igraph)
-library(ggraph)
-library(rsconnect)
 library(cowplot)
-library(data.table)
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE,echo=FALSE}
 #loading processed lyrics data
 load('../output/processed_lyrics.RData')
 artists = read_csv('../data/artists.csv')
 names(artists) = c("artist", "intro", "formed", "members", "origin")
 leftJoinDf = dt_lyrics %>%
   left_join(artists, by = "artist")
-
-ts.df = data.table(leftJoinDf %>%
-  group_by(genre, year) %>%
-  tally())
-
-final.ts.df = data.frame(ts.df[ , .(Totalcount = sum(n)), by = .(year,genre)])
-
 ```
-
-## Time Series Plot of Genre Popularity
-```{r,warning=FALSE, message=FALSE,echo=FALSE}
-#Before year 2000
-before2000 = final.ts.df %>%
-  mutate(genre = fct_reorder(genre, Totalcount)) %>%
-  filter(year > 1967, year < 2000, genre != "Other", genre != "Not Available") %>%
-  ggplot(aes(x = year, y = Totalcount, order = genre)) +
-  geom_line(aes(color = genre), size = 1) +
-  scale_x_continuous(breaks = seq(1965, 2020, 10))
-before2000
-#After year 2000
-after2000 = final.ts.df %>%
-  mutate(genre = fct_reorder(genre, Totalcount)) %>%
-  filter(year > 1967, year >= 2000, genre != "Other", genre != "Not Available") %>%
-  ggplot(aes(x = year, y = Totalcount, order = genre)) +
-  geom_line(aes(color = genre), size = 1) +
-  scale_x_continuous(breaks = seq(1965, 2020, 10))
-after2000
-```
-The two figures above show that while rock was the has been the most popular genre throughout the 4 decades, it peaked in popularity twice in the years 1990 and 2006.
-
-##
 
 ## Part 1 - EDA
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 # # observations and columns
 dim(leftJoinDf)
-
-#structure of the lyrics
-str(leftJoinDf[139, ]$stemmedwords, nchar.max = 300)
 ```
 
-Since one of the target questions is to look for song trends across time, and the dataset contains individual release years, we can create buckets and group the years into decades.
-
+One of the target questions is to look for song trends across time, and the dataset contains individual release years - we can create buckets and group the years into decades.
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 
 leftJoinDf <- leftJoinDf %>%
   mutate(decade = 
-           ifelse(year %in% 1960:1970, "1960s",
            ifelse(year %in% 1970:1980, "1970s",
            ifelse(year %in% 1980:1989, "1980s", 
            ifelse(year %in% 1990:1999, "1990s", 
            ifelse(year %in% 2000:2009, "2000s", 
            ifelse(year %in% 2010:2020, "2010s", 
-                  "NA")))))))
+                  "NA"))))))
 ```
 
-Defining some colors to use throughout the data story
+Defining theme to use throughout the data story
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
-#define some colors to use throughout
-my_colors <- c("#E69F00", "#56B4E9", "#009E73", "#CC79A7", "#D55E00")
-
 theme_lyrics <- function() 
 {
   theme(plot.title = element_text(hjust = 0.5),
@@ -131,17 +88,10 @@ theme_lyrics <- function()
 }
 ```
 
-Based on the plots of number of songs in each genre we see that the number increased from hundreds to thousands and ten thousands, so we will split the dataset based on years < 2000 and > 2000 for better analysis.
 
-```{r,warning=FALSE, message=FALSE,echo=FALSE}
-leftJoinDf <- leftJoinDf %>%
-  mutate(year_split = 
-           ifelse(year %in% 1960:1999, "before 2000", "after 2000"))
-```
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 library(magrittr)
-keeps_decade = c("2000s", "2010s")
 leftJoinDf %>%
   filter(decade != "NA") %>%
   dplyr::group_by(decade, genre) %>%
@@ -156,13 +106,12 @@ leftJoinDf %>%
   labs(x = NULL, y = "Song Count")
 ```
 
-
-The first plot above shows that the most active decade was 2000s, with Rock being the most popular genre.
+The plot above shows that the most active decade was 2000s, with Rock being the most popular genre.
 
 
 $~$
 
-Top 10 songs with most words, grouped by artists. We expect hip hop to generally contain more number of words than songs in other genres which is what we observe here. 
+Songs with most words (showing only top 10), grouped by artists.  
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 library(magrittr)
@@ -173,11 +122,7 @@ full_word_count <- leftJoinDf %>%
   arrange(desc(num_words)) 
 
 full_word_count[1:10,] %>%
-  ungroup(num_words, song) %>%
-  kable("html", escape = FALSE, align = "c", caption = "Songs With Highest Word Count") %>%
-  kable_styling(bootstrap_options = 
-                  c("striped", "condensed", "bordered"), 
-                  full_width = FALSE)
+  ungroup(num_words, song)
 ```
 
 
@@ -193,10 +138,12 @@ full_word_count %>%
           panel.grid.minor.y = element_blank())
 ```
 
-We observe from above histogram that it's skewed to the right, with most songs containing fewer than 500 words
+The histogram is very skewed to the right, with most songs containing fewer than 500 words.
 
 
-**Top Words:**
+$~$
+
+**What are the most frequently used words?**
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 undesirable_words = c("lot", "today", "months", "month", "wanna", "wouldnt", "wasnt", "ha", "na", "ooh", "da",
         "gonna", "im", "dont", "aint", "wont", "yeah", "la", "oi", "nigga", "fuck",
@@ -214,7 +161,7 @@ song_words_filtered %>%
   ungroup() %>%
   mutate(word = reorder(word, n)) %>%
   ggplot() +
-    geom_col(aes(word, n)) +
+    geom_col(aes(word, n), fill = "#0072B2") +
     theme(legend.position = "none", 
           plot.title = element_text(hjust = 0.5),
           panel.grid.major = element_blank()) +
@@ -224,12 +171,13 @@ song_words_filtered %>%
     coord_flip()
 ```
 
-**Word Cloud: #1**
+$~$
+
+**Word Cloud #1: Most frequently used words in lyrics data**
+
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 word_counts <- song_words_filtered %>%
-  dplyr::count(word, sort = TRUE) 
-
-wordcloud2(word_counts[1:100, ], size = 0.5)
+  dplyr::count(word, sort = TRUE)
 
 set.seed(1234)
 wordcloud(words = word_counts$word, freq = word_counts$n, min.freq = 1,
@@ -238,7 +186,6 @@ wordcloud(words = word_counts$word, freq = word_counts$n, min.freq = 1,
 ```
 
 
-**Popular Words By Genre:**
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 popular_words <- song_words_filtered %>% 
   group_by(genre) %>%
@@ -264,8 +211,12 @@ popular_words %>%
 The top words across the genres are very similar.
 
 
+$~$
+
 **Popular words across decades**
-```{r}
+
+
+```{r, message=FALSE, warning=FALSE,echo=FALSE}
 timeless_words <- song_words_filtered %>% 
   filter(decade != 'NA') %>%
   group_by(decade) %>%
@@ -277,9 +228,9 @@ timeless_words <- song_words_filtered %>%
 
 timeless_words %>%
   ggplot(aes(row, n, fill = decade)) +
-    geom_col(show.legend = NULL) +
+    geom_col() +
     labs(x = NULL, y = "Song Count") +
-    ggtitle("Timeless Words") + 
+    ggtitle("Top words across decades") + 
     theme_lyrics() +  
     facet_wrap(~decade, scales = "free", ncol = 5) +
     scale_x_continuous(  # This handles replacement of row 
@@ -288,8 +239,13 @@ timeless_words %>%
     coord_flip()
 ```
 
+Again, most top words were common across decades, with order slightly changed.
+
+$~$
 
 **Word Length**
+
+We can also see length of individual words used in songs
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 word_lengths <- leftJoinDf %>%
@@ -313,7 +269,11 @@ word_lengths %>%
           panel.grid.minor = element_blank())
 ```
 
+We observe that the histogram is skewed to the right, meaning that most words are less than 15 letters, which makes sense because longer words are not very common and are very hard to rhyme. 
+
 It's interesting to see what these long words are through a wordcloud -->
+
+**Word Cloud #2: What are these really long words?**
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 wc <- word_lengths %>%
@@ -323,10 +283,112 @@ wc <- word_lengths %>%
   arrange(desc(word_length))
 
 wordcloud2(wc[1:100, ], 
-           size = .15,
+           size = .25,
            minSize = .0005,
            ellipticity = .3, 
            rotateRatio = 1, 
            fontWeight = "bold")
 ```
 
+Most of these words contain repeated letters; these words may have been used for mimicking tune and rythm and not so much for conveying meaning.
+
+$~$
+
+## Part 2 - Sentiment Analysis and Topic Modeling with NLP
+
+**Sentiment Score**
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+tidy_reviews <- leftJoinDf %>% unnest_tokens(word, stemmedwords)
+tidy_reviews <- tidy_reviews %>% 
+  group_by(id) %>% 
+  dplyr::mutate(position_in_review_0 = 1:n())
+tidy_reviews <- tidy_reviews %>% 
+  group_by(id) %>% 
+  dplyr::mutate(position_in_review_0 = 1:n())
+cleaned_reviews <- tidy_reviews %>% 
+  arrange(id, position_in_review_0)
+cleaned_reviews <- cleaned_reviews %>% 
+  group_by(id) %>% 
+  dplyr::mutate(position_in_review = 1:n())  %>% 
+  dplyr::select(-position_in_review_0)
+cleaned_reviews <- cleaned_reviews %>% 
+  group_by(id) %>%
+  dplyr::mutate(wordcount_review = n(), 
+                percentage_in_review = round(position_in_review/wordcount_review,2))
+
+```
+
+
+**Word Cloud #3 - top words grouped by emotions**
+
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+library(reshape2)
+library(wordcloud)
+cleaned_reviews %>%
+  inner_join(get_sentiments("nrc"), by = "word") %>% 
+  dplyr::count(word, sentiment, sort = TRUE) %>% 
+  acast(word ~ sentiment, value.var = "n", fill = 0, fun.aggregate = length) %>% 
+  comparison.cloud(max.words = 200, title.size = 0.5, scale=c(0.5,1))
+```
+
+
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "joy")
+
+cleaned_reviews %>%
+  inner_join(nrc_joy) %>%
+  dplyr::count(word, sort = TRUE)
+
+bing_word_counts <- cleaned_reviews %>%
+  inner_join(get_sentiments("bing")) %>%
+  dplyr::count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+bing_word_counts
+```
+
+
+**Term Frequency by Genre - TF**
+
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+lyrics_words <- leftJoinDf %>%
+  filter(genre != "Other", genre != "Not Available") %>%
+  unnest_tokens(word, stemmedwords) %>%
+  dplyr::count(genre, word, sort = TRUE)
+
+total_words <- lyrics_words %>% 
+  group_by(genre) %>% 
+  dplyr::summarize(total = sum(n))
+
+lyrics_words <- left_join(lyrics_words, total_words)
+
+lyrics_words
+
+ggplot(lyrics_words, aes(n/total, fill = genre)) +
+  geom_histogram(show.legend = FALSE) +
+  xlim(NA, 0.0009) +
+  labs(title = "Frequency distribution") +
+  facet_wrap(~genre, ncol = 3, scales = "free_y")
+```
+
+
+**Highest tf-idf words songs, grouped by genre**
+
+```{r,warning=FALSE, message=FALSE,echo=FALSE}
+lyrics_words <- lyrics_words %>%
+  bind_tf_idf(word, genre, n)
+
+lyrics_words %>%
+  arrange(desc(tf_idf)) %>%
+  dplyr::mutate(word = factor(word, levels = rev(unique(word)))) %>% 
+  group_by(genre) %>% 
+  top_n(10) %>% 
+  ungroup() %>%
+  ggplot(aes(word, tf_idf, fill = genre)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "tf-idf") +
+  theme_lyrics()+
+  facet_wrap(~genre, scales = "free") +
+  coord_flip()
+```
