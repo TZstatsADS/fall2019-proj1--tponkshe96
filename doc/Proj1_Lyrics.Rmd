@@ -1,5 +1,5 @@
 ---
-title: "Proj1 ADS"
+title: "Project 1, Applied Data Science"
 author: "Tushar Ponkshe"
 date: 'Due: 9/18/2019'
 output:
@@ -62,7 +62,7 @@ leftJoinDf = dt_lyrics %>%
 
 
 
-## Part 1 - EDA
+## EDA
 
 
 First, I read the preprocessed csv file "processed_lyrics.RData". We can see that the dataset contains 125,704 rows and 11 columns or features. 
@@ -459,3 +459,12 @@ lyrics_words %>%
 - In the future I hope to do an in-depth analysis of artists in each genre over 5 decades
 
 - The artists.csv file contains artists's locations, origin etc which can be used for further analysis
+
+
+## Resources used
+
+- https://towardsdatascience.com/text-analysis-of-successful-song-lyrics-e41a4ccb26f5
+
+- https://www.datacamp.com/community/tutorials/R-nlp-machine-learning
+
+- https://www.tidytextmining.com/topicmodeling.html
