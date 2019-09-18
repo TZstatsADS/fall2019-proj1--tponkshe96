@@ -9,10 +9,12 @@ This is the first and only *individual* (as opposed to *team*) this semester.
 
 Term: Fall 2019
 
-+ Projec title: Lorem ipsum dolor sit amet
-+ This project is conducted by [your name]
++ Projec title: Data Story
++ This project is conducted by Tushar Ponkshe
 
-+ Project summary: [a short summary] Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ The objective of this project was to analyze trends in music lyrics over 4 decades of collected lyrics data. The entire dataset - "lyrics.csv" is a filtered corpus of 380,000+ song lyrics from from MetroLyrics. You can read more about it on [Kaggle](https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics). For the purpose of this report I have used a cleaned version of lyrics data provided to us in starter code.
+
+The starter code in Text_Processing.Rmd cleans the original dataset by removing stop words and performing various preprocessing tasks such as converting all the lyrics to the lower case, removing punctuation, numbers, empty words, extra white spaces, and stemming. The cleaned version of data is then saved as a RData file. 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
