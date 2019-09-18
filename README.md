@@ -2,14 +2,14 @@
 ## Fall 2019
 ## Project 1: A "data story" on the songs of our times
 
-<img src="figs/title1.jpeg" width="500">
+<img src="figs/title.jpeg" width="500">
 
 ### [Project Description](doc/)
 This is the first and only *individual* (as opposed to *team*) this semester. 
 
 Term: Fall 2019
 
-+ Projec title: Data Story
++ Projec title: Project 1, Applied Data Science
 + This project is conducted by Tushar Ponkshe
 
 + The objective of this project was to analyze trends in music lyrics over 4 decades of collected lyrics data. The entire dataset - "lyrics.csv" is a filtered corpus of 380,000+ song lyrics from from MetroLyrics. You can read more about it on [Kaggle](https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics). For the purpose of this report I have used a cleaned version of lyrics data provided to us in starter code.
