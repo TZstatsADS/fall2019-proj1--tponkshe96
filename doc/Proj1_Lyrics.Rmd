@@ -356,7 +356,7 @@ cleaned_reviews <- tidy_reviews
 ```
 
 
-## Word Cloud #3 - top words grouped by emotions
+#### Word Cloud #3 - top words grouped by emotions
 
 ```{r,warning=FALSE, message=FALSE,echo=FALSE}
 library(reshape2)
@@ -391,7 +391,7 @@ The dictionary correctly categorized most words in the corpus. Words like "free"
 
 
 
-## Highest tf-idf words, grouped by genre
+#### Highest tf-idf words, grouped by genre
 
 Term-frequency-inverse document frequency (TF-IDF) is another way to judge the topic of an article by the words it contains. With TF-IDF, words are given weight – TF-IDF measures relevance, not frequency. That is, wordcounts are replaced with TF-IDF scores across the whole dataset.
 
